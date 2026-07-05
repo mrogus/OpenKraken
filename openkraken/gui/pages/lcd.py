@@ -37,6 +37,7 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QPushButton,
     QRadioButton,
@@ -63,6 +64,7 @@ _MODES: list[tuple[str, str]] = [
     ("sensors", "Sensor screen (rendered)"),
     ("static", "Static image"),
     ("gif", "Animated GIF"),
+    ("web", "Web integration"),
     ("off", "Screen off"),
 ]
 
@@ -173,6 +175,13 @@ class LcdPage(QWidget):
         # the thread boundary go via that snapshot rather than a live shared object.
         self._lcd_cfg = dataclasses.replace(config.lcd)
 
+        # Working copy of the web-integration list; edited via Add/Remove and
+        # persisted on Apply.
+        self._web_integrations: list[dict[str, str]] = [
+            {"name": str(i.get("name", "")), "url": str(i.get("url", ""))}
+            for i in config.lcd.web_integrations
+        ]
+
         # Latest sample data, kept for the sensor-preview render.
         self._last_status: "DeviceStatus | None" = None
         self._last_snap: "SystemSnapshot | None" = None
@@ -277,6 +286,27 @@ class LcdPage(QWidget):
         fbox.addWidget(self._path_label)
         layout.addWidget(self._file_box)
 
+        # --- web integration sub-options -------------------------------------
+        self._web_box = QGroupBox("Web integration")
+        wbox = QVBoxLayout(self._web_box)
+        self._web_combo = QComboBox()
+        self._web_combo.currentIndexChanged.connect(self._refresh_preview)
+        wbox.addWidget(self._web_combo)
+        web_btn_row = QHBoxLayout()
+        self._web_add_btn = QPushButton("Add…")
+        self._web_add_btn.clicked.connect(self._add_web_integration)
+        self._web_remove_btn = QPushButton("Remove")
+        self._web_remove_btn.clicked.connect(self._remove_web_integration)
+        web_btn_row.addWidget(self._web_add_btn)
+        web_btn_row.addWidget(self._web_remove_btn)
+        web_btn_row.addStretch(1)
+        wbox.addLayout(web_btn_row)
+        web_hint = QLabel("Renders an NZXT web integration (needs Playwright).")
+        web_hint.setWordWrap(True)
+        web_hint.setProperty("hint", True)
+        wbox.addWidget(web_hint)
+        layout.addWidget(self._web_box)
+
         layout.addStretch(1)
 
         # --- brightness + orientation ----------------------------------------
@@ -361,6 +391,8 @@ class LcdPage(QWidget):
         if cfg.orientation in _ORIENTATIONS:
             self._orient_combo.setCurrentIndex(_ORIENTATIONS.index(cfg.orientation))
 
+        self._populate_web_combo(select_url=cfg.web_url)
+
         # File path label reflects whichever path matches the current mode.
         self._update_path_label()
         self._sync_mode_widgets()
@@ -377,10 +409,54 @@ class LcdPage(QWidget):
             return self._style_keys[idx]
         return next(iter(lcd_render.STYLES), "liquid_ring")
 
+    # ---------------------------------------------------------- web integrations
+    def _populate_web_combo(self, select_url: str = "") -> None:
+        """Refill the web-integration combo, selecting the entry for ``select_url``."""
+        self._web_combo.blockSignals(True)
+        self._web_combo.clear()
+        for item in self._web_integrations:
+            self._web_combo.addItem(item.get("name") or item.get("url", ""))
+        select_idx = 0
+        for i, item in enumerate(self._web_integrations):
+            if item.get("url") == select_url:
+                select_idx = i
+                break
+        if self._web_integrations:
+            self._web_combo.setCurrentIndex(select_idx)
+        self._web_combo.blockSignals(False)
+
+    def _current_web_url(self) -> str:
+        idx = self._web_combo.currentIndex()
+        if 0 <= idx < len(self._web_integrations):
+            return self._web_integrations[idx].get("url", "")
+        return ""
+
+    def _add_web_integration(self) -> None:
+        """Prompt for a name + URL and append a new web integration."""
+        name, ok = QInputDialog.getText(self, "Add web integration", "Name:")
+        if not ok or not name.strip():
+            return
+        url, ok = QInputDialog.getText(
+            self, "Add web integration", "URL:", text="https://"
+        )
+        if not ok or not url.strip():
+            return
+        self._web_integrations.append({"name": name.strip(), "url": url.strip()})
+        self._populate_web_combo(select_url=url.strip())
+        self._refresh_preview()
+
+    def _remove_web_integration(self) -> None:
+        idx = self._web_combo.currentIndex()
+        if 0 <= idx < len(self._web_integrations):
+            del self._web_integrations[idx]
+            self._populate_web_combo()
+            self._refresh_preview()
+
     def _sync_mode_widgets(self) -> None:
         mode = self._current_mode()
         self._sensor_box.setVisible(mode == "sensors")
         self._file_box.setVisible(mode in ("static", "gif"))
+        self._web_box.setVisible(mode == "web")
         self._update_path_label()
         self._refresh_preview()
 
@@ -472,6 +548,16 @@ class LcdPage(QWidget):
             self._render_file_preview(self._lcd_cfg.image_path)
         elif mode == "gif":
             self._render_file_preview(self._lcd_cfg.gif_path)
+        elif mode == "web":
+            idx = self._web_combo.currentIndex()
+            name = (
+                self._web_integrations[idx].get("name", "")
+                if 0 <= idx < len(self._web_integrations)
+                else ""
+            )
+            self._preview.set_placeholder(
+                f"Web integration\n{name}" if name else "Web integration"
+            )
         elif mode == "off":
             self._preview.set_placeholder("Screen off")
         else:  # liquid
@@ -552,6 +638,8 @@ class LcdPage(QWidget):
             sensor_style=self._current_style(),
             sensor_interval=float(self._interval_spin.value()),
             ring_color=tuple(self._ring_color),
+            web_url=self._current_web_url(),
+            web_integrations=[dict(i) for i in self._web_integrations],
         )
 
     def _apply(self) -> None:

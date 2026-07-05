@@ -119,11 +119,21 @@ class ChannelConfig:
         )
 
 
+# Web integrations shipped by default (name -> URL). "Aviation" is the first one.
+_DEFAULT_WEB_INTEGRATIONS: list[dict[str, str]] = [
+    {"name": "Aviation", "url": "https://reinhardtbotha.github.io/NZXT-aviation/"},
+]
+
+
+def _default_web_integrations() -> list[dict[str, str]]:
+    return [dict(i) for i in _DEFAULT_WEB_INTEGRATIONS]
+
+
 @dataclass
 class LcdConfig:
     """Configuration for the round 640x640 LCD."""
 
-    mode: str = "liquid"  # "liquid" | "sensors" | "static" | "gif" | "off"
+    mode: str = "liquid"  # "liquid" | "sensors" | "static" | "gif" | "web" | "off"
     brightness: int = 50  # 0-100
     orientation: int = 0  # 0 | 90 | 180 | 270
     image_path: str = ""  # last chosen static image (absolute path)
@@ -133,6 +143,10 @@ class LcdConfig:
     #: Colour of the liquid-temperature arc on the ring (RGB 0-255). NZXT purple
     #: by default; warn/crit temperatures still override it amber/red.
     ring_color: tuple[int, int, int] = (124, 58, 237)
+    #: Selected web-integration URL ("" = none chosen) for mode "web".
+    web_url: str = ""
+    #: User-managed list of web integrations ({"name", "url"}); seeded with Aviation.
+    web_integrations: list[dict[str, str]] = field(default_factory=_default_web_integrations)
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serializable mapping."""
@@ -145,6 +159,11 @@ class LcdConfig:
             "sensor_style": self.sensor_style,
             "sensor_interval": float(self.sensor_interval),
             "ring_color": [int(c) for c in self.ring_color],
+            "web_url": self.web_url,
+            "web_integrations": [
+                {"name": str(i.get("name", "")), "url": str(i.get("url", ""))}
+                for i in self.web_integrations
+            ],
         }
 
     @classmethod
@@ -168,6 +187,16 @@ class LcdConfig:
             ring_norm = _normalize_colors([ring_raw], fallback=[base.ring_color])
             ring_color = ring_norm[0] if ring_norm else base.ring_color
 
+        raw_web = d.get("web_integrations")
+        if isinstance(raw_web, list):
+            web_integrations = [
+                {"name": str(i.get("name", "")), "url": str(i.get("url", ""))}
+                for i in raw_web
+                if isinstance(i, dict) and i.get("url")
+            ]
+        else:
+            web_integrations = list(base.web_integrations)
+
         return cls(
             mode=_as_str(d.get("mode"), base.mode),
             brightness=brightness,
@@ -177,6 +206,8 @@ class LcdConfig:
             sensor_style=_as_str(d.get("sensor_style"), base.sensor_style),
             sensor_interval=_as_float(d.get("sensor_interval"), base.sensor_interval),
             ring_color=ring_color,
+            web_url=_as_str(d.get("web_url"), base.web_url),
+            web_integrations=web_integrations,
         )
 
 

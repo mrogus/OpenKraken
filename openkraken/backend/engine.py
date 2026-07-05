@@ -328,6 +328,10 @@ class ControlEngine(QThread):
         # Latest brightness / orientation we successfully pushed, for change detection.
         self._applied_brightness: int | None = None
         self._applied_orientation: int | None = None
+        # Web-integration renderer (mode "web"), created lazily and torn down on
+        # mode change / engine stop. Optional (needs the Playwright extra).
+        self._web_renderer = None
+        self._web_unavailable_warned = False
 
         # Most recent sample, used to seed software-curve duty from the *actual*
         # current source temperature when a cpu/gpu curve is applied.
@@ -381,6 +385,8 @@ class ControlEngine(QThread):
             sensor_style=cfg.sensor_style,
             sensor_interval=cfg.sensor_interval,
             ring_color=tuple(cfg.ring_color),
+            web_url=cfg.web_url,
+            web_integrations=list(cfg.web_integrations),
         )
         self._requests.put(lambda: self._do_apply_lcd(snapshot))
 
@@ -476,6 +482,7 @@ class ControlEngine(QThread):
                 self._tick_deferred_lcd()
                 self._tick_lcd_selfheal()
                 self._tick_lcd_sensors(status, snap)
+                self._tick_lcd_web(status, snap)
 
                 # 5. Stream an animated lighting frame if due (~1 FPS ceiling).
                 self._tick_lighting()
@@ -488,6 +495,7 @@ class ControlEngine(QThread):
         except Exception:  # pragma: no cover - defensive; loop must never crash silently
             _LOGGER.exception("control engine crashed")
         finally:
+            self._close_web_renderer()
             self._device.disconnect()
             _LOGGER.info("control engine stopped")
 
@@ -803,6 +811,70 @@ class ControlEngine(QThread):
         self._repaint_lighting()
 
     # ------------------------------------------------------------------ #
+    # Loop step 4c: web-integration frame streaming (LCD mode "web").
+    # ------------------------------------------------------------------ #
+    def _tick_lcd_web(self, status: DeviceStatus, snap: SystemSnapshot) -> None:
+        """Render and push one web-integration frame if in "web" mode and due.
+
+        Mirrors :meth:`_tick_lcd_sensors`: renders the selected web app (fed live
+        telemetry) to a frame via :class:`WebRenderer` and streams it through the
+        same flicker-free double-buffered path.
+        """
+        if self._lcd_apply_pending_until is not None:
+            return
+        if self._lcd_cfg.mode != "web":
+            return
+        now = time.monotonic()
+        if now - self._last_lcd_push < self._lcd_cfg.sensor_interval:
+            return
+        self._last_lcd_push = now
+        if not self._device.is_connected:
+            return
+        url = self._lcd_cfg.web_url
+        if not url:
+            return
+        renderer = self._ensure_web_renderer()
+        if renderer is None:
+            return
+        renderer.set_url(url)
+        from openkraken.backend.web_render import build_monitoring_data
+
+        path = renderer.render(build_monitoring_data(snap, status))
+        if not path:
+            _LOGGER.debug("web frame not produced (held previous frame)")
+            return
+        if not self._device.set_lcd_sensor_frame(path):
+            self._emit_connection(self._device.is_connected)
+            return
+        self._repaint_lighting()
+
+    def _ensure_web_renderer(self):
+        """Lazily create the web renderer; ``None`` if Playwright is unavailable."""
+        if self._web_renderer is not None:
+            return self._web_renderer
+        from openkraken.backend.web_render import WebRenderer
+
+        if not WebRenderer.available():
+            if not self._web_unavailable_warned:
+                self._web_unavailable_warned = True
+                _LOGGER.warning("web integration mode needs Playwright ([web] extra)")
+                self.error.emit(
+                    "Web integration needs Playwright (pip install playwright)"
+                )
+            return None
+        self._web_renderer = WebRenderer(size=640)
+        return self._web_renderer
+
+    def _close_web_renderer(self) -> None:
+        """Tear down the web renderer (idempotent; engine thread)."""
+        renderer, self._web_renderer = self._web_renderer, None
+        if renderer is not None:
+            try:
+                renderer.close()
+            except Exception:
+                _LOGGER.debug("web renderer close failed", exc_info=True)
+
+    # ------------------------------------------------------------------ #
     # Loop step 5: RGB lighting frame streaming.
     # ------------------------------------------------------------------ #
     def _tick_lighting(self) -> None:
@@ -1021,13 +1093,17 @@ class ControlEngine(QThread):
         self._lcd_cfg = cfg
         self._config.lcd = cfg
 
+        # Leaving web mode: release the headless browser.
+        if previous_mode == "web" and cfg.mode != "web":
+            self._close_web_renderer()
+
         if not self._device.is_connected:
             _LOGGER.debug("apply_lcd deferred: device disconnected")
             return
 
-        # Reset the sensor push timer so a fresh frame is pushed promptly when we
-        # (re)enter sensors mode.
-        if cfg.mode == "sensors":
+        # Reset the push timer so a fresh frame streams promptly when we (re)enter
+        # a streamed mode (rendered sensors or web integration).
+        if cfg.mode in ("sensors", "web"):
             self._last_lcd_push = 0.0
 
         # ---- brightness handling, including the "off" emulation ----
@@ -1083,6 +1159,17 @@ class ControlEngine(QThread):
             self._emit_apply_result(
                 "lcd", f"sensor screen ({cfg.sensor_style})", True
             )
+        elif cfg.mode == "web":
+            if cfg.web_url:
+                # Frames stream from _tick_lcd_web; re-establish image mode first
+                # so the first frame un-wedges a firmware/liquid screen cleanly.
+                self._device.request_lcd_reinit()
+                if self._web_renderer is not None:
+                    self._web_renderer.set_url(cfg.web_url)
+                self._emit_apply_result("lcd", f"web integration {cfg.web_url}", True)
+            else:
+                _LOGGER.warning("LCD web mode requested without a URL")
+                self.error.emit("LCD: no web integration selected")
         else:
             _LOGGER.warning("unknown LCD mode %r (was %r)", cfg.mode, previous_mode)
 

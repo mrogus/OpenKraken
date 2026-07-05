@@ -39,6 +39,9 @@ gui = ["PyQt6>=6.4"]
 # NVIDIA GPU telemetry via NVML (no per-sample nvidia-smi process spawn).
 # Optional: without it the code falls back to nvidia-smi.
 nvidia = ["nvidia-ml-py>=12"]
+# Web-integration LCD mode (renders a web app to the panel via headless Chromium).
+# After installing, run: python -m playwright install chromium
+web = ["playwright>=1.40"]
 
 [project.urls]
 Homepage = "https://github.com/davidboulay/OpenKraken"
