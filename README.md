@@ -46,6 +46,11 @@ A rendered sensor screen running on the cooler's round LCD:
     (multiple styles), with a configurable liquid-ring colour and
     auto-detected CPU/GPU **vendor badges** (AMD / Intel / NVIDIA)
   - **Static images** and **animated GIFs**
+  - **Web integrations** — render an NZXT-style web dashboard (HTML/JS, e.g. the
+    [Aviation](https://reinhardtbotha.github.io/NZXT-aviation/) screen) live to
+    the panel, the way NZXT CAM's Web Integration does on Windows. Add your own
+    by URL from the LCD page (optional `[web]` extra — see
+    [Optional extras](#optional-extras)).
   - Brightness, orientation (0/90/180/270°), and a software "off"
 
   *Custom vendor logos:* the sensor screens show a stylised vendor wordmark by
@@ -93,6 +98,26 @@ cd openkraken
 4. Verifies PyQt6 is importable (installs it into the venv if not).
 5. Installs an `openkraken.desktop` launcher into
    `~/.local/share/applications/` with absolute `Exec`/`Icon` paths.
+
+## Optional extras
+
+Some features live behind optional dependency groups so the base install stays
+light. Install them into the venv after `setup.sh` as needed:
+
+- **NVIDIA GPU via NVML** — `.venv/bin/pip install -e '.[nvidia]'`. Reads a
+  discrete NVIDIA GPU through NVML instead of spawning `nvidia-smi` on every
+  sample (much lighter). Optional: without it OpenKraken falls back to
+  `nvidia-smi`, and without either the AMD `amdgpu` hwmon is used.
+- **Web integrations** — `.venv/bin/pip install -e '.[web]'`, then fetch the
+  browser once:
+
+  ```sh
+  .venv/bin/python -m playwright install chromium
+  ```
+
+  Enables the **Web integration** LCD mode, which renders web dashboards to the
+  panel via a headless Chromium (heavier than the built-in sensor screens).
+  Without it the mode is disabled; nothing else is affected.
 
 ## Run
 
