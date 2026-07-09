@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         # really exit instead of hiding to tray.
         self._really_quit = False
 
-        self.setWindowTitle("OpenKraken")
+        self.setWindowTitle("Kraken-Redux")
         self.setWindowIcon(theme.make_app_icon())
         self.setMinimumSize(*_MIN_SIZE)
 
@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
         """Construct the tray icon, menu and wiring (host must be available)."""
         tray = QSystemTrayIcon(self)
         tray.setIcon(theme.make_tray_icon(None))
-        tray.setToolTip("OpenKraken")
+        tray.setToolTip("Kraken-Redux")
 
         menu = QMenu()
 
@@ -394,9 +394,9 @@ class MainWindow(QMainWindow):
         self._last_tray_temp = new_temp
         self._tray.setIcon(theme.make_tray_icon(temp))
         if temp is not None:
-            self._tray.setToolTip(f"OpenKraken — liquid {temp:.0f}°C")
+            self._tray.setToolTip(f"Kraken-Redux — liquid {temp:.0f}°C")
         else:
-            self._tray.setToolTip("OpenKraken")
+            self._tray.setToolTip("Kraken-Redux")
 
     def _on_connection_changed(self, connected: bool, description: str) -> None:
         if connected:

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=OpenKraken
+Name=Kraken-Redux
 GenericName=Liquid Cooler Control
-Comment=Monitor and control your NZXT Kraken 2024 Elite RGB liquid cooler
+Comment=Monitor and control your NZXT Kraken liquid cooler (fork of OpenKraken)
 # Exec and Icon are rewritten to absolute paths by setup.sh when the entry is
 # installed into ~/.local/share/applications/. The placeholders below let the
 # file work as a template and remain valid (if unresolved) if launched in place.
@@ -13,4 +13,4 @@ Terminal=false
 Categories=System;Monitor;
 Keywords=nzxt;kraken;cooler;aio;liquid;temperature;fan;pump;lcd;
 StartupNotify=true
-StartupWMClass=openkraken
+StartupWMClass=kraken-redux

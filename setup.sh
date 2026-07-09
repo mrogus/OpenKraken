@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# OpenKraken — environment bootstrap.
+# Kraken-Redux — environment bootstrap.
 #
 # Creates a virtual environment (with access to the system PyQt6), installs the
 # project in editable mode, makes sure the liquidctl driver knows about the
@@ -18,13 +18,13 @@ VENV_DIR="$SCRIPT_DIR/.venv"
 PY="$VENV_DIR/bin/python"
 PIP="$VENV_DIR/bin/pip"
 
-DESKTOP_SRC="$SCRIPT_DIR/openkraken.desktop"
+DESKTOP_SRC="$SCRIPT_DIR/kraken-redux.desktop"
 DESKTOP_DST_DIR="$HOME/.local/share/applications"
-DESKTOP_DST="$DESKTOP_DST_DIR/openkraken.desktop"
-# Stale pre-rename desktop entry to remove if present.
-DESKTOP_STALE="$DESKTOP_DST_DIR/kraken-cam.desktop"
+DESKTOP_DST="$DESKTOP_DST_DIR/kraken-redux.desktop"
+# Stale pre-rename desktop entries to remove if present (kraken-cam -> openkraken -> kraken-redux).
+DESKTOP_STALE_NAMES=("kraken-cam.desktop" "openkraken.desktop")
 
-EXEC_PATH="$VENV_DIR/bin/openkraken"
+EXEC_PATH="$VENV_DIR/bin/kraken-redux"
 ICON_PATH="$SCRIPT_DIR/openkraken/resources/openkraken.svg"
 
 GIT_LIQUIDCTL="git+https://github.com/liquidctl/liquidctl"
@@ -50,7 +50,7 @@ else
 fi
 
 # --- 2. install project -----------------------------------------------------
-step "Installing OpenKraken (editable) and dependencies"
+step "Installing Kraken-Redux (editable) and dependencies"
 "$PIP" install -U pip
 "$PIP" install -e .
 ok "package installed"
@@ -90,11 +90,14 @@ fi
 # --- 5. desktop launcher ----------------------------------------------------
 step "Installing desktop launcher"
 mkdir -p "$DESKTOP_DST_DIR"
-# Remove the stale pre-rename launcher so the menu shows only "OpenKraken".
-if [[ -f "$DESKTOP_STALE" ]]; then
-    rm -f "$DESKTOP_STALE"
-    ok "removed stale launcher $DESKTOP_STALE"
-fi
+# Remove stale pre-rename launchers so the menu shows only "Kraken-Redux".
+for stale_name in "${DESKTOP_STALE_NAMES[@]}"; do
+    stale_path="$DESKTOP_DST_DIR/$stale_name"
+    if [[ -f "$stale_path" ]]; then
+        rm -f "$stale_path"
+        ok "removed stale launcher $stale_path"
+    fi
+done
 # Rewrite the Exec/Icon placeholders to absolute paths for the installed copy.
 # Use '|' as the sed delimiter since the values are filesystem paths.
 sed -e "s|@EXEC@|${EXEC_PATH}|g" \
@@ -220,12 +223,12 @@ fi
 step "Setup complete"
 cat <<EOF
 
-  OpenKraken is installed.
+  Kraken-Redux is installed.
 
   Run it from a terminal:
       ${EXEC_PATH}
 
-  Or launch "OpenKraken" from your application menu.
+  Or launch "Kraken-Redux" from your application menu.
 
   Useful flags:
       ${EXEC_PATH} --minimized     start hidden in the system tray

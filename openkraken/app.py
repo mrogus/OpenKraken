@@ -148,8 +148,8 @@ def setup_single_instance(
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="openkraken",
-        description="Linux clone of NZXT CAM for the NZXT Kraken 2024 Elite RGB.",
+        prog="kraken-redux",
+        description="Linux clone of NZXT CAM for NZXT Kraken AIOs (fork of OpenKraken).",
     )
     parser.add_argument(
         "--minimized",
@@ -174,7 +174,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"openkraken {__version__}",
+        version=f"kraken-redux {__version__}",
     )
     return parser
 
@@ -247,15 +247,15 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     _configure_logging(args.debug)
 
-    _LOGGER.info("Starting OpenKraken %s", __version__)
+    _LOGGER.info("Starting Kraken-Redux %s", __version__)
 
     config = AppConfig.load(args.config)
     start_minimized = bool(args.minimized or config.start_minimized)
 
     app = QApplication(sys.argv[:1] + (argv or sys.argv[1:]))
-    app.setApplicationName("openkraken")
-    app.setApplicationDisplayName("OpenKraken")
-    app.setDesktopFileName("openkraken")
+    app.setApplicationName("kraken-redux")
+    app.setApplicationDisplayName("Kraken-Redux")
+    app.setDesktopFileName("kraken-redux")
     # Keep running when the last window is hidden to tray.
     app.setQuitOnLastWindowClosed(False)
 

@@ -1,14 +1,20 @@
-# OpenKraken
+# Kraken-Redux
 
 *A native Linux desktop app for NZXT Kraken liquid coolers — monitor, tune curves, and drive the LCD without rebooting into Windows.*
 
-A Linux clone of **NZXT CAM** for the **NZXT Kraken 2024 Elite RGB** all-in-one
-liquid cooler, built with **PyQt6** on top of [**liquidctl**](https://github.com/liquidctl/liquidctl).
+Fork of [OpenKraken](https://github.com/davidboulay/OpenKraken) with fixes for
+non-Debian distros (LCD font resolution via fontconfig, a PyQt6 GUI crash
+guard, sensor-frame orientation), NVML-based NVIDIA telemetry, a Web
+Integration LCD mode (renders NZXT CAM web apps to the panel), and a faster
+device (re)connect on hardware that doesn't answer the lighting-info query.
 
-NZXT does not ship CAM for Linux. OpenKraken gives you a native desktop app to
-monitor your loop, drive pump/fan curves that run in the cooler's own firmware,
-and push live sensor screens, images, and GIFs to the round LCD — without
-rebooting into Windows.
+A Linux clone of **NZXT CAM** for NZXT Kraken all-in-one liquid coolers, built
+with **PyQt6** on top of [**liquidctl**](https://github.com/liquidctl/liquidctl).
+
+NZXT does not ship CAM for Linux. Kraken-Redux gives you a native desktop app
+to monitor your loop, drive pump/fan curves that run in the cooler's own
+firmware, and push live sensor screens, images, and GIFs to the round LCD —
+without rebooting into Windows.
 
 > Status: early but functional (`0.1.0`). Targets the Kraken 2024 Elite RGB
 > (USB `1e71:3012`) but works with any `KrakenZ3`-class cooler liquidctl supports.
