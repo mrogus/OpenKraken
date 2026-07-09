@@ -6,12 +6,13 @@ pkgdesc="Native Linux desktop app for NZXT Kraken liquid coolers (PyQt6 + liquid
 arch=('any')
 url="https://github.com/mrogus/kraken-redux"
 license=('MIT')
-depends=('python' 'python-pyqt6' 'python-pillow' 'python-liquidctl' 'udev')
+depends=('python' 'python-pyqt6' 'python-pillow' 'liquidctl' 'udev')
 optdepends=(
-    'python-pip: to install the optional nvidia/web extras into a venv'
-    'nvidia-utils: NVML GPU telemetry (nvidia extra)'
+    'python-nvidia-ml-py: NVML GPU telemetry instead of spawning nvidia-smi'
+    'python-playwright: Web Integration LCD mode (run "python -m playwright install chromium" once after installing)'
 )
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools' 'git')
+install=kraken-redux.install
 source=("git+https://github.com/mrogus/kraken-redux.git#branch=kraken-redux")
 sha256sums=('SKIP')
 

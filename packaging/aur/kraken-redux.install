@@ -1,0 +1,17 @@
+post_install() {
+    udevadm control --reload-rules 2>/dev/null || true
+    udevadm trigger 2>/dev/null || true
+    echo ':: Reloaded udev rules. Unplug/replug the Kraken (or reboot) so the'
+    echo '   new device permissions take effect.'
+    echo ':: Optional: for the Web Integration LCD mode, install python-playwright'
+    echo '   then run once: python -m playwright install chromium'
+}
+
+post_upgrade() {
+    post_install
+}
+
+post_remove() {
+    udevadm control --reload-rules 2>/dev/null || true
+    udevadm trigger 2>/dev/null || true
+}
