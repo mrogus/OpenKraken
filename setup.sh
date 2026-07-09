@@ -32,7 +32,16 @@ GIT_LIQUIDCTL="git+https://github.com/liquidctl/liquidctl"
 # NZXT vendor id and where the device-access udev rule is installed.
 NZXT_VENDOR_ID="1e71"
 UDEV_RULE_PATH="/etc/udev/rules.d/70-openkraken.rules"
-UDEV_RULE_BODY='SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1e71", TAG+="uaccess", MODE="0660", GROUP="plugdev"'
+# Two subsystems: hidraw (HID) AND raw USB bulk (the round LCD is driven over
+# pyusb bulk-out, not hidraw) both need uaccess. When the in-kernel
+# nzxt_kraken3 driver is bound, liquidctl also drives pump/fan curves through
+# hwmon sysfs attributes (pwm*, temp*_auto_point*_pwm) -- sysfs attributes
+# aren't device nodes, so uaccess/OWNER/GROUP/MODE don't reach them; only an
+# explicit RUN+= chmod does. World-writable is deliberate: this rule ships to
+# arbitrary users whose desktop uid isn't known at install time.
+UDEV_RULE_BODY='SUBSYSTEMS=="usb|hidraw", ATTRS{idVendor}=="1e71", TAG+="uaccess"
+ACTION=="add|change", SUBSYSTEM=="hwmon", ATTRS{name}=="kraken2023elite", RUN+="/bin/sh -c '"'"'chmod 666 /sys%p/pwm* /sys%p/temp*_auto_point*_pwm 2>/dev/null'"'"'"
+ACTION=="add|change", SUBSYSTEM=="hwmon", ATTRS{name}=="kraken2024elite", RUN+="/bin/sh -c '"'"'chmod 666 /sys%p/pwm* /sys%p/temp*_auto_point*_pwm 2>/dev/null'"'"'"'
 
 # --- pretty progress --------------------------------------------------------
 step() { printf '\n\033[1;35m==>\033[0m \033[1m%s\033[0m\n' "$*"; }

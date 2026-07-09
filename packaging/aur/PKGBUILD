@@ -1,0 +1,48 @@
+# Maintainer: mrogus <taigasen@gmail.com>
+pkgname=kraken-redux
+pkgver=0.2.7
+pkgrel=1
+pkgdesc="Native Linux desktop app for NZXT Kraken liquid coolers (PyQt6 + liquidctl); fork of OpenKraken"
+arch=('any')
+url="https://github.com/mrogus/kraken-redux"
+license=('MIT')
+depends=('python' 'python-pyqt6' 'python-pillow' 'python-liquidctl' 'udev')
+optdepends=(
+    'python-pip: to install the optional nvidia/web extras into a venv'
+    'nvidia-utils: NVML GPU telemetry (nvidia extra)'
+)
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools' 'git')
+source=("git+https://github.com/mrogus/kraken-redux.git#branch=kraken-redux")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$srcdir/kraken-redux"
+    grep -m1 '^version' pyproject.toml | sed -E 's/version = "(.*)"/\1/'
+}
+
+build() {
+    cd "$srcdir/kraken-redux"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/kraken-redux"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+
+    install -Dm644 "kraken-redux.desktop" \
+        "$pkgdir/usr/share/applications/kraken-redux.desktop"
+    install -Dm644 "openkraken/resources/openkraken.svg" \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/kraken-redux.svg"
+    install -Dm644 "packaging/aur/70-kraken-redux.rules" \
+        "$pkgdir/usr/lib/udev/rules.d/70-kraken-redux.rules"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 PROTOCOL.md "$pkgdir/usr/share/doc/$pkgname/PROTOCOL.md"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+    # The installed .desktop ships @EXEC@/@ICON@ placeholders meant for setup.sh's
+    # per-user venv install; resolve them to the system paths this package uses.
+    sed -i \
+        -e "s|@EXEC@|/usr/bin/kraken-redux|g" \
+        -e "s|@ICON@|kraken-redux|g" \
+        "$pkgdir/usr/share/applications/kraken-redux.desktop"
+}

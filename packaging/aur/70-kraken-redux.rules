@@ -1,0 +1,16 @@
+# Kraken-Redux — non-root access to NZXT Kraken coolers (vendor 1e71).
+#
+# Two subsystems are involved: the HID report path AND the raw USB bulk path
+# (the round LCD is driven over pyusb bulk-out, not hidraw). uaccess grants an
+# ACL to whoever is logged in at the seat, covering both.
+SUBSYSTEMS=="usb|hidraw", ATTRS{idVendor}=="1e71", TAG+="uaccess"
+
+# When the in-kernel nzxt_kraken3 driver is bound, liquidctl drives pump/fan
+# curves through hwmon sysfs attributes (pwm*, temp*_auto_point*_pwm) instead
+# of raw HID. sysfs attributes are NOT device nodes, so udev's OWNER/GROUP/MODE
+# keys and ACL (uaccess) do not apply to them -- only an explicit RUN+= chmod
+# does. world-writable is deliberately broad (any uid may control the fan
+# curve) rather than a fixed uid, since this rule ships to arbitrary AUR users
+# whose desktop uid we don't know at package-build time.
+ACTION=="add|change", SUBSYSTEM=="hwmon", ATTRS{name}=="kraken2023elite", RUN+="/bin/sh -c 'chmod 666 /sys%p/pwm* /sys%p/temp*_auto_point*_pwm 2>/dev/null'"
+ACTION=="add|change", SUBSYSTEM=="hwmon", ATTRS{name}=="kraken2024elite", RUN+="/bin/sh -c 'chmod 666 /sys%p/pwm* /sys%p/temp*_auto_point*_pwm 2>/dev/null'"
