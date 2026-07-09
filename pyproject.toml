@@ -44,7 +44,7 @@ nvidia = ["nvidia-ml-py>=12"]
 web = ["playwright>=1.40"]
 
 [project.urls]
-Homepage = "https://github.com/mrogus/kraken-redux"
+Homepage = "https://github.com/mrogus/OpenKraken"
 Upstream = "https://github.com/davidboulay/OpenKraken"
 "liquidctl" = "https://github.com/liquidctl/liquidctl"
 
