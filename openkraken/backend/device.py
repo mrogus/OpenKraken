@@ -155,6 +155,14 @@ _LIGHTING_REPORT_LENGTH = 64
 #: (mirrors kraken3.py ``_MAX_READ_ATTEMPTS``).
 _LIGHTING_MAX_READ_ATTEMPTS = 12
 
+#: Wall-clock cap on the same wait: a model that never answers 0x20 0x03 (e.g.
+#: the 2023 Elite) still returns *some* 64-byte report roughly once per
+#: sensor-poll cycle (~1 Hz), so 12 fixed reads cost ~11s of dead time on every
+#: connect before ``_lighting_info_unsupported`` kicks in on the *next* one.
+#: Bound the very first attempt by time too, so even the initial connect stays
+#: snappy on hardware that doesn't support the query.
+_LIGHTING_READ_DEADLINE_S = 2.5
+
 #: Bytes per LED on the wire: one G, R, B triplet (PROTOCOL.md §4).
 _BYTES_PER_LED = 3
 
@@ -282,6 +290,12 @@ class KrakenDevice:
         #: (no raw dump from a real 3012 exists yet).  ``None`` until a reply with
         #: the ``0x21 0x03`` prefix has been read.
         self.last_lighting_reply: list[int] | None = None
+        #: Set once a lighting-info query times out with no reply (12 reads,
+        #: paced by the device's ~1 Hz report cadence -> ~11s wasted). Some
+        #: models (e.g. the 2023 Elite) never answer 0x20 0x03 at all, so once
+        #: we've learned that the hard way we skip the query on every later
+        #: (re)connect instead of re-paying the ~11s stall each time.
+        self._lighting_info_unsupported: bool = False
         #: Watches the driver logger for swallowed LCD bucket failures so uploads
         #: can self-heal (installed once, lazily, in :meth:`_set_screen`).
         self._bucket_watcher: _BucketFailureWatcher | None = None
@@ -457,8 +471,11 @@ class KrakenDevice:
             # never tears down the connection on its own I/O error (a genuine
             # disconnect is caught by the next get_status).  We still return the
             # live ``_connected`` flag rather than a bare ``True`` so the result is
-            # always honest about the connection state.
-            self.query_lighting_info()
+            # always honest about the connection state.  Skipped entirely once we
+            # know this model never replies (see ``_lighting_info_unsupported``):
+            # otherwise every (re)connect would pay its ~11s timeout for nothing.
+            if not self._lighting_info_unsupported:
+                self.query_lighting_info()
             return self._connected
 
     def disconnect(self) -> None:
@@ -846,9 +863,11 @@ class KrakenDevice:
                 return None
 
             if reply is None:
+                self._lighting_info_unsupported = True
                 logger.warning(
                     "query_lighting_info: no %02x %02x reply within %d reads; "
-                    "falling back to default LED counts",
+                    "falling back to default LED counts and skipping this "
+                    "query on future (re)connects",
                     _LIGHTING_INFO_REPLY_PREFIX[0],
                     _LIGHTING_INFO_REPLY_PREFIX[1],
                     _LIGHTING_MAX_READ_ATTEMPTS,
@@ -1000,10 +1019,13 @@ class KrakenDevice:
         caller treats that as a non-fatal miss, NOT an I/O error).  Caller holds
         the lock; raises only on a genuine read I/O error.
         """
+        deadline = time.monotonic() + _LIGHTING_READ_DEADLINE_S
         for _ in range(_LIGHTING_MAX_READ_ATTEMPTS):
             msg = list(self._dev.device.read(_LIGHTING_REPORT_LENGTH))
             if len(msg) >= 2 and msg[0] == prefix[0] and msg[1] == prefix[1]:
                 return msg
+            if time.monotonic() >= deadline:
+                break
         return None
 
     # ----------------------------------------------------------------- helpers
