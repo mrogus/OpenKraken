@@ -14,6 +14,7 @@ instance) -- the Playwright *sync* API requires that.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
@@ -152,11 +153,35 @@ class WebRenderer:
     @staticmethod
     def available() -> bool:
         """True if Playwright (and, best-effort, its browser) can be used."""
+        return WebRenderer.diagnose() is None
+
+    @staticmethod
+    def diagnose() -> str | None:
+        """``None`` if Web Integration is fully usable, else a short reason.
+
+        Two independent things can be missing: the ``playwright`` Python
+        package, and (separately) its headless Chromium build, which is a
+        multi-hundred-MB binary Playwright downloads itself on
+        ``playwright install chromium`` -- no distro package manager vendors
+        it, so it's easy to have one without the other. Callers (the GUI)
+        use this to surface a concrete, actionable message instead of a
+        silent failure once the user actually picks Web Integration mode.
+        """
         try:
-            import playwright.sync_api  # noqa: F401
+            from playwright.sync_api import sync_playwright
         except Exception:
-            return False
-        return True
+            return "Playwright is not installed (pip/pacman: python-playwright)."
+        try:
+            with sync_playwright() as pw:
+                exe = pw.chromium.executable_path
+                if not exe or not os.path.exists(exe):
+                    return (
+                        "Playwright's Chromium is not downloaded yet -- run: "
+                        "python -m playwright install chromium"
+                    )
+        except Exception as exc:
+            return f"Playwright is installed but unusable: {exc}"
+        return None
 
     def set_url(self, url: str) -> None:
         """Select the integration URL; reloaded on the next :meth:`render`."""

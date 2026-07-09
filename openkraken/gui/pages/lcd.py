@@ -48,6 +48,7 @@ from PyQt6.QtWidgets import (
 )
 
 from openkraken.backend import lcd_render
+from openkraken.backend.web_render import WebRenderer
 from openkraken.config import LcdConfig
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -305,6 +306,15 @@ class LcdPage(QWidget):
         web_hint.setWordWrap(True)
         web_hint.setProperty("hint", True)
         wbox.addWidget(web_hint)
+        # Populated by _refresh_web_availability() with a concrete, actionable
+        # message (missing package vs. missing Chromium download) instead of
+        # letting the mode silently fail once applied. Hidden when all good.
+        self._web_warning = QLabel("")
+        self._web_warning.setWordWrap(True)
+        self._web_warning.setProperty("warning", True)
+        self._web_warning.setStyleSheet("color: #e0a030;")
+        self._web_warning.setVisible(False)
+        wbox.addWidget(self._web_warning)
         layout.addWidget(self._web_box)
 
         layout.addStretch(1)
@@ -457,8 +467,22 @@ class LcdPage(QWidget):
         self._sensor_box.setVisible(mode == "sensors")
         self._file_box.setVisible(mode in ("static", "gif"))
         self._web_box.setVisible(mode == "web")
+        if mode == "web":
+            self._refresh_web_availability()
         self._update_path_label()
         self._refresh_preview()
+
+    def _refresh_web_availability(self) -> None:
+        """Show a concrete warning if Playwright/Chromium aren't ready.
+
+        Checked fresh on every switch into Web Integration mode (cheap,
+        ~0.2s) rather than cached, since the fix (installing the package /
+        running "playwright install chromium") happens outside the app and
+        we want the very next visit to this page to reflect it.
+        """
+        reason = WebRenderer.diagnose()
+        self._web_warning.setText(reason or "")
+        self._web_warning.setVisible(bool(reason))
 
     def _update_path_label(self) -> None:
         mode = self._current_mode()

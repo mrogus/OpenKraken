@@ -1,8 +1,10 @@
 post_install() {
+    # `udevadm trigger` re-synthesizes "add" events for devices already
+    # plugged in, which re-runs our rules (uaccess ACL + the hwmon chmod)
+    # against them immediately -- no physical unplug/replug or reboot needed.
     udevadm control --reload-rules 2>/dev/null || true
     udevadm trigger 2>/dev/null || true
-    echo ':: Reloaded udev rules. Unplug/replug the Kraken (or reboot) so the'
-    echo '   new device permissions take effect.'
+    echo ':: udev rules reloaded and applied to the already-connected Kraken.'
     echo ':: Optional: for the Web Integration LCD mode, install python-playwright'
     echo '   then run once: python -m playwright install chromium'
 }
