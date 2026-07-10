@@ -4,7 +4,7 @@ push it to the Kraken LCD -- a Linux stand-in for NZXT CAM's "Web Integration".
 
 Pipeline: Playwright (Chromium) loads the web app, we inject the NZXT
 ``window.nzxt.v1`` API shim *before* the app runs, feed it real telemetry via
-``onMonitoringDataUpdate`` (CPU + discrete GPU via OpenKraken's SystemSensors,
+``onMonitoringDataUpdate`` (CPU + discrete GPU via Kraken-Redux's SystemSensors,
 liquid temp/fan/pump from the nzxt_kraken3 hwmon), then screenshot the result.
 
 Usage:
@@ -155,12 +155,12 @@ def render(url: str, out_path: str, scale: int) -> str:
 
 
 def push_to_lcd(image_path: str) -> None:
-    """Push the rendered PNG to the Kraken via OpenKraken's device wrapper."""
+    """Push the rendered PNG to the Kraken via Kraken-Redux's device wrapper."""
     from openkraken.backend.device import KrakenDevice
 
     dev = KrakenDevice()
     if not dev.connect():
-        print("push: could not connect to Kraken (is OpenKraken still running?)")
+        print("push: could not connect to Kraken (is Kraken-Redux still running?)")
         return
     ok = dev.set_lcd_static(image_path)
     print("push: set_lcd_static ->", ok)

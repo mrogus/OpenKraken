@@ -1,6 +1,6 @@
 """Thread-safe wrapper around the liquidctl Kraken Z3 driver.
 
-This is the single choke-point for *all* device I/O in OpenKraken.  Every public
+This is the single choke-point for *all* device I/O in Kraken-Redux.  Every public
 method serializes driver access through an internal :class:`threading.RLock`, so
 the engine thread, startup, and shutdown can all touch the device safely.
 

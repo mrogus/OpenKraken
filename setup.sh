@@ -25,7 +25,7 @@ DESKTOP_DST="$DESKTOP_DST_DIR/kraken-redux.desktop"
 DESKTOP_STALE_NAMES=("kraken-cam.desktop" "openkraken.desktop")
 
 EXEC_PATH="$VENV_DIR/bin/kraken-redux"
-ICON_PATH="$SCRIPT_DIR/openkraken/resources/openkraken.svg"
+ICON_PATH="$SCRIPT_DIR/openkraken/resources/kraken-redux.svg"
 
 GIT_LIQUIDCTL="git+https://github.com/liquidctl/liquidctl"
 

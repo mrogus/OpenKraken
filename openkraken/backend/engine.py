@@ -1,4 +1,4 @@
-"""Control engine for OpenKraken.
+"""Control engine for Kraken-Redux.
 
 This module owns *all* periodic work in the application: device polling, system
 sensor sampling, software-curve duty computation, LCD sensor-screen rendering and
@@ -302,7 +302,7 @@ class ControlEngine(QThread):
         # Monotonic timestamp of the last sensor-screen push (0 == never).
         self._last_lcd_push: float = 0.0
         # When set, the initial LCD apply (and sensor streaming) is deferred until
-        # this monotonic deadline. Used only at boot, so OpenKraken's fragile
+        # this monotonic deadline. Used only at boot, so Kraken-Redux's fragile
         # multi-step LCD bucket writes don't race the boot HID/USB storm (winedevice,
         # OpenRGB scan, etc.) which intermittently corrupts the panel to black.
         # The firmware screen shows during the wait; cooling/lighting apply at once.

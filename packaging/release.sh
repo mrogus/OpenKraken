@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# release.sh — cut an OpenKraken release.
+# release.sh — cut a Kraken-Redux release.
 #
 # Usage:
 #   packaging/release.sh patch|minor|major     # bump from the current version
@@ -65,7 +65,7 @@ info "version bumped in __init__.py + pyproject.toml"
 # --- 2. commit + tag ---------------------------------------------------------
 git -C "$ROOT" add openkraken/__init__.py pyproject.toml
 git -C "$ROOT" commit -q -m "Release v$NEW"
-git -C "$ROOT" tag -a "v$NEW" -m "OpenKraken v$NEW"
+git -C "$ROOT" tag -a "v$NEW" -m "Kraken-Redux v$NEW"
 info "committed and tagged v$NEW"
 
 # --- 3. push -----------------------------------------------------------------
@@ -88,7 +88,7 @@ if command -v gh >/dev/null 2>&1; then
         gh release upload "v$NEW" "$DEB" --clobber
     else
         gh release create "v$NEW" "$DEB" \
-            --title "OpenKraken v$NEW" \
+            --title "Kraken-Redux v$NEW" \
             --generate-notes
     fi
     info "GitHub release v$NEW ready"

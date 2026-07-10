@@ -1,4 +1,4 @@
-"""Host-side LED effect engine for OpenKraken.
+"""Host-side LED effect engine for Kraken-Redux.
 
 This module is pure Python (no Qt, no I/O) and computes per-LED RGB frames for
 the NZXT Kraken 2024 Elite RGB.  The device's *hardware* effect/animation modes

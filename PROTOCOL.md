@@ -1,7 +1,7 @@
-# OpenKraken — Native LED Control Protocol: NZXT Kraken 2024 Elite RGB
+# Kraken-Redux — Native LED Control Protocol: NZXT Kraken 2024 Elite RGB
 
 Authoritative wire protocol for adding native LED control of the **NZXT Kraken 2024 Elite RGB**
-to the OpenKraken app. Every claim is tagged with its source:
+to the Kraken-Redux app. Every claim is tagged with its source:
 
 - **[PR882]** = liquidctl PR #882 (`feat/kraken-2024-elite-rgb` @ 708a375), tested on real hardware
   (same device + firmware as ours). Open/unmerged.
@@ -31,7 +31,7 @@ to the OpenKraken app. Every claim is tagged with its source:
 `0x3012` in `KrakenZ3` with `color_channels = _COLOR_CHANNELS_KRAKEN2023 = {}` (empty) — so the installed
 liquidctl provides **no RGB API** for this device; `set_color` raises `NotSupportedByDevice`.
 [kraken3.py L597-608, L85, L331-332]. PR #882 (which would add RGB) is **not merged** into the installed
-version. OpenKraken must therefore implement the wire protocol itself (or vendor the PR #882 logic) — we
+version. Kraken-Redux must therefore implement the wire protocol itself (or vendor the PR #882 logic) — we
 cannot rely on `liquidctl set-color` for this PID today. [OpenRGB][kraken3.py][PR882]
 
 **Why we follow the OpenRGB Direct path as our primary spec:** PR #882's hardware tester and the OpenRGB
@@ -286,7 +286,7 @@ device" as authoritative for the opcode. [PR882]
 
 These tables exist in `kraken3.py` and are inherited by the `KrakenX3` animation path. They are documented
 here for completeness only; **per §7 the hardware effect path that consumes them is rejected by this device**,
-so OpenKraken should not emit them. [kraken3.py L97-169][OpenRGB #4828]
+so Kraken-Redux should not emit them. [kraken3.py L97-169][OpenRGB #4828]
 
 - Effect opcode header (`0x28 0x03` in HUE2 / `0x2A 0x04` in kraken3) — see §7, do not use.
 - `_COLOR_MODES` mode ids: fixed/off=0x00, fading=0x01, super-fixed=(0x01,variant 0x01), spectrum-wave=0x02,

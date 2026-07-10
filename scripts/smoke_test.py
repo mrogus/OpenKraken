@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offscreen integration smoke test for OpenKraken.
+"""Offscreen integration smoke test for Kraken-Redux.
 
 Exercises every module WITHOUT touching hardware: no device.connect(), no
 engine.start(), no hidraw, no liquidctl CLI. Reading real sysfs/proc for the

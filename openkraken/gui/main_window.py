@@ -1,4 +1,4 @@
-"""Main application window for OpenKraken.
+"""Main application window for Kraken-Redux.
 
 Hosts the left navigation sidebar, the stacked pages (Dashboard / Cooling /
 LCD / Settings), the status bar, and the optional system-tray integration
@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
                 self._tray_retry_timer = None
             _LOGGER.info(
                 "No tray host appeared after %d attempts; running without a "
-                "tray icon (relaunch OpenKraken to open the window).",
+                "tray icon (relaunch Kraken-Redux to open the window).",
                 self._tray_retry_attempts,
             )
 
@@ -538,7 +538,7 @@ class MainWindow(QMainWindow):
         QApplication.quit()
 
     def restart_app(self) -> None:
-        """Stop the engine and re-exec OpenKraken in place (for self-update).
+        """Stop the engine and re-exec Kraken-Redux in place (for self-update).
 
         ``os.execv`` replaces this process image, so it keeps the same systemd
         unit / launch context — the freshly pulled code runs on next start.
@@ -546,7 +546,7 @@ class MainWindow(QMainWindow):
         import os
         import sys
 
-        _LOGGER.info("Restarting OpenKraken to load the updated version.")
+        _LOGGER.info("Restarting Kraken-Redux to load the updated version.")
         self._really_quit = True
         try:
             self._engine.stop()
@@ -566,7 +566,7 @@ class MainWindow(QMainWindow):
         - ``"tray"`` — a tray exists and ``close_to_tray`` is set: hide to tray.
         - ``"background"`` — no tray but ``run_in_background`` is set: hide the
           window and keep the engine running (cooling/lighting/LCD stay active);
-          re-launching OpenKraken reopens it.
+          re-launching Kraken-Redux reopens it.
         - ``"quit"`` — stop the engine and exit the application.
 
         An explicit user quit (``self._really_quit``) always yields ``"quit"``.
@@ -598,7 +598,7 @@ class MainWindow(QMainWindow):
             if not MainWindow._logged_background_notice:
                 MainWindow._logged_background_notice = True
                 _LOGGER.info(
-                    "running in background; launch OpenKraken again to reopen "
+                    "running in background; launch Kraken-Redux again to reopen "
                     "the window (Ctrl+Q quits)"
                 )
             return

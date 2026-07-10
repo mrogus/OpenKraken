@@ -4,7 +4,7 @@ pkgver=0.2.7
 pkgrel=1
 pkgdesc="Native Linux desktop app for NZXT Kraken liquid coolers (PyQt6 + liquidctl); fork of OpenKraken"
 arch=('any')
-url="https://github.com/mrogus/OpenKraken"
+url="https://github.com/mrogus/Kraken-Redux"
 license=('MIT')
 depends=('python' 'python-pyqt6' 'python-pillow' 'liquidctl' 'udev')
 optdepends=(
@@ -13,7 +13,7 @@ optdepends=(
 )
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools' 'git')
 install=kraken-redux.install
-source=("kraken-redux::git+https://github.com/mrogus/OpenKraken.git#branch=kraken-redux")
+source=("kraken-redux::git+https://github.com/mrogus/Kraken-Redux.git#branch=main")
 sha256sums=('SKIP')
 
 pkgver() {
@@ -32,7 +32,7 @@ package() {
 
     install -Dm644 "kraken-redux.desktop" \
         "$pkgdir/usr/share/applications/kraken-redux.desktop"
-    install -Dm644 "openkraken/resources/openkraken.svg" \
+    install -Dm644 "openkraken/resources/kraken-redux.svg" \
         "$pkgdir/usr/share/icons/hicolor/scalable/apps/kraken-redux.svg"
     install -Dm644 "packaging/aur/70-kraken-redux.rules" \
         "$pkgdir/usr/lib/udev/rules.d/70-kraken-redux.rules"

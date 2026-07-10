@@ -1,4 +1,4 @@
-"""Check GitHub for a newer OpenKraken and (for git checkouts) apply it.
+"""Check GitHub for a newer Kraken-Redux and (for git checkouts) apply it.
 
 Pure stdlib (``urllib``/``subprocess``) so it adds no dependency.  All network
 and git work is best-effort and never raises out of the public functions; the
@@ -26,7 +26,7 @@ from pathlib import Path
 
 _LOGGER = logging.getLogger(__name__)
 
-REPO = "davidboulay/OpenKraken"
+REPO = "mrogus/Kraken-Redux"
 _BRANCH = "main"
 _API_LATEST_COMMIT = f"https://api.github.com/repos/{REPO}/commits/{_BRANCH}"
 _API_LATEST_RELEASE = f"https://api.github.com/repos/{REPO}/releases/latest"
@@ -37,7 +37,7 @@ _TIMEOUT = 6.0
 def _get_json(url: str) -> dict | None:
     req = urllib.request.Request(
         url,
-        headers={"Accept": "application/vnd.github+json", "User-Agent": "OpenKraken-updater"},
+        headers={"Accept": "application/vnd.github+json", "User-Agent": "Kraken-Redux-updater"},
     )
     try:
         with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
@@ -115,7 +115,7 @@ def _fetch_remote_head() -> str | None:
     """Latest commit SHA on the upstream default branch via the GitHub API."""
     req = urllib.request.Request(
         _API_LATEST_COMMIT,
-        headers={"Accept": "application/vnd.github+json", "User-Agent": "OpenKraken-updater"},
+        headers={"Accept": "application/vnd.github+json", "User-Agent": "Kraken-Redux-updater"},
     )
     try:
         with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
@@ -170,7 +170,7 @@ def check_for_update() -> UpdateStatus:
             can_apply=False,
             local_rev=None,
             remote_rev=latest or remote_short,
-            message=f"OpenKraken v{_installed} is up to date.",
+            message=f"Kraken-Redux v{_installed} is up to date.",
         )
 
     if local == remote:
@@ -180,7 +180,7 @@ def check_for_update() -> UpdateStatus:
             can_apply=True,
             local_rev=local[:7],
             remote_rev=remote_short,
-            message="OpenKraken is up to date.",
+            message="Kraken-Redux is up to date.",
         )
     return UpdateStatus(
         checked=True,
@@ -202,4 +202,4 @@ def apply_update() -> tuple[bool, str]:
         _LOGGER.warning("git pull failed: %s", out)
         return False, f"Update failed: {out.splitlines()[-1] if out else 'git pull error'}"
     _LOGGER.info("updated via git pull: %s", out.replace("\n", " ")[:200])
-    return True, "Updated. Restart OpenKraken to run the new version."
+    return True, "Updated. Restart Kraken-Redux to run the new version."

@@ -341,13 +341,13 @@ LOGO_DIR = Path.home() / ".config" / "openkraken" / "logos"
 #: Cache of loaded+scaled logo images, keyed by (vendor, target_height).
 _LOGO_CACHE: dict[tuple[str, int], Image.Image | None] = {}
 
-#: Bundled OpenKraken droplet mark (used as the "Liquid" logo on sensor screens).
-_APP_MARK_PATH = Path(__file__).resolve().parent.parent / "resources" / "openkraken-mark.png"
+#: Bundled Kraken-Redux droplet mark (used as the "Liquid" logo on sensor screens).
+_APP_MARK_PATH = Path(__file__).resolve().parent.parent / "resources" / "kraken-redux-mark.png"
 _APP_MARK_CACHE: dict[int, Image.Image | None] = {}
 
 
 def _load_app_mark(target_h: int) -> Image.Image | None:
-    """Load and scale the bundled OpenKraken droplet mark to *target_h* px."""
+    """Load and scale the bundled Kraken-Redux droplet mark to *target_h* px."""
     if target_h in _APP_MARK_CACHE:
         return _APP_MARK_CACHE[target_h]
     mark: Image.Image | None = None
@@ -663,7 +663,7 @@ def _render_triple(data: LcdData) -> Image.Image:
 
     # --- Liquid, large, centred and lifted up. ---
     liquid_y = cy - 92
-    # The OpenKraken droplet mark stands in for the "LIQUID" label.
+    # The Kraken-Redux droplet mark stands in for the "LIQUID" label.
     mark = _load_app_mark(target_h=46)
     if mark is not None:
         img.paste(mark, (int(cx - mark.width / 2), int(liquid_y - 92 - mark.height / 2)), mark)

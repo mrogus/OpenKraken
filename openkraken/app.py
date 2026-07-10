@@ -1,4 +1,4 @@
-"""Application bootstrap and ``main()`` entry point for OpenKraken.
+"""Application bootstrap and ``main()`` entry point for Kraken-Redux.
 
 Parses CLI arguments, configures logging, builds the Qt application, wires up
 the backend (device + sensors + control engine) and the main window, and runs
@@ -185,7 +185,7 @@ class _BucketSwitchNoiseFilter(logging.Filter):
     On this device the LCD bucket-switch handshake intermittently logs this at
     ERROR while a Wine HID client (e.g. an OpenDeck plugin) has the hidraw node
     open, but the driver retries and the operation succeeds (measured: 0/60
-    functional failures).  OpenKraken still logs its own warning if a real LCD
+    functional failures).  Kraken-Redux still logs its own warning if a real LCD
     push fails, so suppressing this intermediate noise loses no signal.  Kept
     visible under --debug.
     """
@@ -231,7 +231,7 @@ def _install_sigint_handler(app: QApplication, engine: ControlEngine) -> QTimer:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the OpenKraken application.
+    """Run the Kraken-Redux application.
 
     Parameters
     ----------
@@ -269,7 +269,7 @@ def main(argv: list[str] | None = None) -> int:
     instance_name = _instance_server_name()
     if _notify_running_instance(instance_name, activate=not args.minimized):
         _LOGGER.info(
-            "Another OpenKraken instance is already running; %s it.",
+            "Another Kraken-Redux instance is already running; %s it.",
             "pinged" if args.minimized else "activated",
         )
         return 0
@@ -306,7 +306,7 @@ def main(argv: list[str] | None = None) -> int:
     if start_minimized:
         _LOGGER.info(
             "Starting minimized; tray icon appears once the panel's tray "
-            "host is up. Relaunch OpenKraken to open the window."
+            "host is up. Relaunch Kraken-Redux to open the window."
         )
     else:
         window.show()

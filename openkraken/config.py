@@ -1,4 +1,4 @@
-"""Persistent application configuration for OpenKraken.
+"""Persistent application configuration for Kraken-Redux.
 
 Defines the dataclasses describing the user's cooling/LCD/app preferences and
 handles (de)serialization to a JSON file under ``~/.config/openkraken``.
@@ -334,10 +334,10 @@ class AppConfig:
     close_to_tray: bool = True
     #: Keep the control engine running (cooling/lighting/LCD stay active) when the
     #: window is closed on a desktop with no system tray, instead of quitting.
-    #: The window is hidden and re-launching OpenKraken reopens it.
+    #: The window is hidden and re-launching Kraken-Redux reopens it.
     run_in_background: bool = True
     apply_on_start: bool = True
-    #: Seconds to defer the LCD apply when starting *during boot*, so OpenKraken's
+    #: Seconds to defer the LCD apply when starting *during boot*, so Kraken-Redux's
     #: multi-step LCD writes don't race the boot HID/USB storm (which intermittently
     #: blacks the panel). The firmware screen shows during the wait; 0 disables.
     #: Only applies near boot (low system uptime); manual restarts apply at once.

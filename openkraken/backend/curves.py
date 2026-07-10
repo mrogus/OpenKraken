@@ -1,4 +1,4 @@
-"""Fan/pump duty curve maths for OpenKraken.
+"""Fan/pump duty curve maths for Kraken-Redux.
 
 This module is pure Python (no Qt, no I/O) and provides:
 

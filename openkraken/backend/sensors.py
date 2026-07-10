@@ -1,4 +1,4 @@
-"""System sensor sampling for OpenKraken.
+"""System sensor sampling for Kraken-Redux.
 
 Reads CPU/GPU/RAM telemetry from the Linux ``sysfs``/``procfs`` interfaces with
 no external dependencies (no ``psutil``).  Everything is best-effort: every file

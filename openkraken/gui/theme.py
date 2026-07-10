@@ -1,4 +1,4 @@
-"""Application-wide theming for OpenKraken.
+"""Application-wide theming for Kraken-Redux.
 
 Provides the colour palette, a comprehensive dark QSS stylesheet, per-metric
 graph colours, and QPainter-drawn application / tray icons.

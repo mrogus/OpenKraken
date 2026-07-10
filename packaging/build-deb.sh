@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# build-deb.sh — build a self-contained openkraken_<version>_amd64.deb.
+# build-deb.sh — build a self-contained kraken-redux_<version>_amd64.deb.
 #
 # Layout produced inside the package:
-#   /usr/lib/openkraken/openkraken/        the Python package, copied from source
-#   /usr/lib/openkraken/vendor/            liquidctl>=1.15 + deps (pip --target)
-#   /usr/bin/openkraken                    launcher (adds both dirs to sys.path)
-#   /usr/share/applications/openkraken.desktop
-#   /usr/share/icons/hicolor/scalable/apps/openkraken.svg
-#   /usr/lib/udev/rules.d/70-openkraken.rules
-#   /usr/share/doc/openkraken/{README.md,PROTOCOL.md,copyright}
+#   /usr/lib/kraken-redux/openkraken/      the Python package, copied from source
+#   /usr/lib/kraken-redux/vendor/          liquidctl>=1.15 + deps (pip --target)
+#   /usr/bin/kraken-redux                  launcher (adds both dirs to sys.path)
+#   /usr/share/applications/kraken-redux.desktop
+#   /usr/share/icons/hicolor/scalable/apps/kraken-redux.svg
+#   /usr/lib/udev/rules.d/70-kraken-redux.rules
+#   /usr/share/doc/kraken-redux/{README.md,PROTOCOL.md,copyright}
 #
 # PyQt6 and Pillow are NOT vendored: they come from the distribution
 # (Depends: python3-pyqt6, python3-pil). Only liquidctl (which a Debian/Ubuntu
@@ -21,7 +21,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 
-PKG_NAME="openkraken"
+PKG_NAME="kraken-redux"
 ARCH="amd64"
 LIQUIDCTL_SPEC="liquidctl>=1.15"
 
@@ -99,7 +99,7 @@ rm -rf "$BUILD_ROOT"
 PKGROOT="$BUILD_ROOT/pkgroot"
 mkdir -p "$DIST_DIR"
 mkdir -p "$PKGROOT/DEBIAN"
-mkdir -p "$PKGROOT/usr/lib/openkraken"
+mkdir -p "$PKGROOT/usr/lib/$PKG_NAME"
 mkdir -p "$PKGROOT/usr/bin"
 mkdir -p "$PKGROOT/usr/share/applications"
 mkdir -p "$PKGROOT/usr/share/icons/hicolor/scalable/apps"
@@ -109,15 +109,15 @@ info "staged at $PKGROOT"
 
 # --- copy the python package from source ------------------------------------
 step "Copying openkraken package from source"
-cp -a "$PROJECT_ROOT/openkraken" "$PKGROOT/usr/lib/openkraken/openkraken"
+cp -a "$PROJECT_ROOT/openkraken" "$PKGROOT/usr/lib/$PKG_NAME/openkraken"
 # Drop caches / compiled artefacts so the package is reproducible and lean.
-find "$PKGROOT/usr/lib/openkraken/openkraken" -type d -name '__pycache__' -prune -exec rm -rf {} +
-find "$PKGROOT/usr/lib/openkraken/openkraken" -type f -name '*.py[co]' -delete
-info "copied $(find "$PKGROOT/usr/lib/openkraken/openkraken" -name '*.py' | wc -l) python files"
+find "$PKGROOT/usr/lib/$PKG_NAME/openkraken" -type d -name '__pycache__' -prune -exec rm -rf {} +
+find "$PKGROOT/usr/lib/$PKG_NAME/openkraken" -type f -name '*.py[co]' -delete
+info "copied $(find "$PKGROOT/usr/lib/$PKG_NAME/openkraken" -name '*.py' | wc -l) python files"
 
 # --- vendor liquidctl + deps (network pip) ----------------------------------
 step "Vendoring $LIQUIDCTL_SPEC and its dependencies (pip --target)"
-VENDOR_DIR="$PKGROOT/usr/lib/openkraken/vendor"
+VENDOR_DIR="$PKGROOT/usr/lib/$PKG_NAME/vendor"
 mkdir -p "$VENDOR_DIR"
 # --no-compile keeps the tree free of .pyc; we never vendor PyQt6/Pillow (system).
 python3 -m pip install \
@@ -138,10 +138,10 @@ find "$VENDOR_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +
 find "$VENDOR_DIR" -type f -name '*.py[co]' -delete
 
 # --- launcher ---------------------------------------------------------------
-step "Writing /usr/bin/openkraken launcher"
-cat >"$PKGROOT/usr/bin/openkraken" <<'PY'
+step "Writing /usr/bin/$PKG_NAME launcher"
+cat >"$PKGROOT/usr/bin/$PKG_NAME" <<'PY'
 #!/usr/bin/env python3
-"""OpenKraken launcher (Debian package).
+"""Kraken-Redux launcher (Debian package).
 
 Puts the packaged code and the vendored third-party deps (liquidctl) on
 sys.path, then hands off to openkraken.app:main. PyQt6 and Pillow come from the
@@ -150,7 +150,7 @@ distribution's system site-packages (Depends: python3-pyqt6, python3-pil).
 import os
 import sys
 
-_LIB = "/usr/lib/openkraken"
+_LIB = "/usr/lib/kraken-redux"
 _VENDOR = os.path.join(_LIB, "vendor")
 # Prepend so the packaged package and vendored liquidctl win over anything else,
 # but after the interpreter's own dirs.
@@ -163,39 +163,39 @@ from openkraken.app import main  # noqa: E402
 if __name__ == "__main__":
     raise SystemExit(main())
 PY
-chmod 755 "$PKGROOT/usr/bin/openkraken"
+chmod 755 "$PKGROOT/usr/bin/$PKG_NAME"
 
 # --- desktop entry ----------------------------------------------------------
 step "Writing desktop entry, icon, udev rule, docs"
-cat >"$PKGROOT/usr/share/applications/openkraken.desktop" <<'DESKTOP'
+cat >"$PKGROOT/usr/share/applications/$PKG_NAME.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=OpenKraken
+Name=Kraken-Redux
 GenericName=Liquid Cooler Control
-Comment=Monitor and control your NZXT Kraken 2024 Elite RGB liquid cooler
-Exec=/usr/bin/openkraken
-Icon=openkraken
+Comment=Monitor and control your NZXT Kraken liquid cooler (fork of OpenKraken)
+Exec=/usr/bin/kraken-redux
+Icon=kraken-redux
 Terminal=false
 Categories=System;Monitor;
 Keywords=nzxt;kraken;cooler;aio;liquid;temperature;fan;pump;lcd;
 StartupNotify=true
-StartupWMClass=openkraken
+StartupWMClass=kraken-redux
 DESKTOP
-chmod 644 "$PKGROOT/usr/share/applications/openkraken.desktop"
+chmod 644 "$PKGROOT/usr/share/applications/$PKG_NAME.desktop"
 
 # --- icon -------------------------------------------------------------------
-cp -a "$PROJECT_ROOT/openkraken/resources/openkraken.svg" \
-      "$PKGROOT/usr/share/icons/hicolor/scalable/apps/openkraken.svg"
-chmod 644 "$PKGROOT/usr/share/icons/hicolor/scalable/apps/openkraken.svg"
+cp -a "$PROJECT_ROOT/openkraken/resources/kraken-redux.svg" \
+      "$PKGROOT/usr/share/icons/hicolor/scalable/apps/$PKG_NAME.svg"
+chmod 644 "$PKGROOT/usr/share/icons/hicolor/scalable/apps/$PKG_NAME.svg"
 
 # --- udev rule --------------------------------------------------------------
-cat >"$PKGROOT/usr/lib/udev/rules.d/70-openkraken.rules" <<'UDEV'
-# OpenKraken — non-root access to NZXT devices over raw USB HID.
+cat >"$PKGROOT/usr/lib/udev/rules.d/70-$PKG_NAME.rules" <<'UDEV'
+# Kraken-Redux — non-root access to NZXT devices over raw USB HID.
 # Covers the Kraken 2024 Elite RGB (1e71:3012) and all other NZXT (1e71) gear.
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1e71", TAG+="uaccess", MODE="0660", GROUP="plugdev"
 UDEV
-chmod 644 "$PKGROOT/usr/lib/udev/rules.d/70-openkraken.rules"
+chmod 644 "$PKGROOT/usr/lib/udev/rules.d/70-$PKG_NAME.rules"
 
 # --- docs -------------------------------------------------------------------
 cp -a "$PROJECT_ROOT/README.md"   "$PKGROOT/usr/share/doc/$PKG_NAME/README.md"
@@ -206,14 +206,16 @@ chmod 644 "$PKGROOT/usr/share/doc/$PKG_NAME/README.md" \
 # Machine-readable copyright (DEP-5 style).
 cat >"$PKGROOT/usr/share/doc/$PKG_NAME/copyright" <<'COPYRIGHT'
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: OpenKraken
-Source: https://github.com/davidboulay/OpenKraken
+Upstream-Name: Kraken-Redux
+Source: https://github.com/mrogus/Kraken-Redux
+Comment: Fork of OpenKraken (https://github.com/davidboulay/OpenKraken)
 
 Files: *
 Copyright: 2026 David Boulay and OpenKraken contributors
+Copyright: 2026 Kraken-Redux contributors
 License: MIT
 
-Files: usr/lib/openkraken/vendor/*
+Files: usr/lib/kraken-redux/vendor/*
 Copyright: liquidctl contributors
 License: GPL-3.0+
 Comment: Bundled copy of liquidctl (https://github.com/liquidctl/liquidctl)
@@ -254,16 +256,16 @@ cat >"$PKGROOT/DEBIAN/control" <<CONTROL
 Package: $PKG_NAME
 Version: $VERSION
 Architecture: $ARCH
-Maintainer: OpenKraken contributors <noreply@github.com>
+Maintainer: Kraken-Redux contributors <noreply@github.com>
 Installed-Size: $INSTALLED_SIZE_KB
 Depends: python3 (>= 3.10), python3-pyqt6, python3-pil
 Section: utils
 Priority: optional
-Homepage: https://github.com/davidboulay/OpenKraken
+Homepage: https://github.com/mrogus/Kraken-Redux
 Description: $README_TAGLINE
  $DESCRIPTION_SHORT
  .
- OpenKraken is a native PyQt6 desktop app. It monitors CPU/GPU/liquid
+ Kraken-Redux is a native PyQt6 desktop app. It monitors CPU/GPU/liquid
  temperatures and pump/fan RPM, edits pump and fan curves (which run in the
  cooler's own firmware for liquid-temp curves), drives the round 640x640 LCD
  with live sensor screens, images and GIFs, and controls the RGB lighting.

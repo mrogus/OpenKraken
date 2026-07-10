@@ -1,4 +1,4 @@
-"""Live hardware integration test for OpenKraken.
+"""Live hardware integration test for Kraken-Redux.
 
 Run ONLY when no other process (liquidctl CLI, the GUI app) is using the
 cooler.  Exercises every device path the app uses, restoring previous

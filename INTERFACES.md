@@ -1,4 +1,4 @@
-# OpenKraken — Interface Specification
+# Kraken-Redux — Interface Specification
 
 A Linux clone of NZXT CAM for the **NZXT Kraken 2024 Elite RGB** (USB `1e71:3012`),
 built on PyQt6 + liquidctl. This document is the **single source of truth** for all
@@ -449,7 +449,7 @@ Tray: QSystemTrayIcon when `QSystemTrayIcon.isSystemTrayAvailable()` — menu: S
 profile quick-switch (Silent/Balanced/Performance → applies to BOTH channels), Quit.
 Tray icon updated with liquid temp每 sample (only re-render when integer °C changes).
 closeEvent: hide to tray if config.close_to_tray and tray active, else accept and
-`engine.stop()`. Window title "OpenKraken". Set `make_app_icon()`.
+`engine.stop()`. Window title "Kraken-Redux". Set `make_app_icon()`.
 
 ## openkraken/app.py + __main__.py
 
@@ -476,12 +476,12 @@ __main__.py: `from openkraken.app import main; raise SystemExit(main())`
   3. verify: `.venv/bin/python -c "from liquidctl.driver.kraken3 import KrakenZ3"` and grep
      `0x3012` in the installed kraken3.py — if missing, `pip install -U git+https://github.com/liquidctl/liquidctl`
   4. verify PyQt6 importable from venv, else `pip install PyQt6`
-  5. install `openkraken.desktop` to `~/.local/share/applications/` with Exec pointing at
-     `<projdir>/.venv/bin/openkraken`, Icon=`<projdir>/openkraken/resources/openkraken.svg`
+  5. install `kraken-redux.desktop` to `~/.local/share/applications/` with Exec pointing at
+     `<projdir>/.venv/bin/kraken-redux`, Icon=`<projdir>/openkraken/resources/kraken-redux.svg`
   6. print success + how to run. Idempotent.
-- `openkraken.desktop`: Name=OpenKraken; Categories=System;Monitor; Terminal=false;
-  StartupWMClass=openkraken. setup.sh rewrites Exec/Icon paths via sed into the installed copy.
-- `openkraken/resources/openkraken.svg`: simple purple droplet on dark rounded square (hand-write the SVG).
+- `kraken-redux.desktop`: Name=Kraken-Redux; Categories=System;Monitor; Terminal=false;
+  StartupWMClass=kraken-redux. setup.sh rewrites Exec/Icon paths via sed into the installed copy.
+- `openkraken/resources/kraken-redux.svg`: simple purple droplet on dark rounded square (hand-write the SVG).
 - `README.md`: features, screenshot placeholder, install (`./setup.sh`), permissions note
   (plugdev/udev — this machine already OK), supported devices note, FAQ (RGB not supported
   upstream; LCD sensor mode refresh rate vs USB bandwidth), uninstall.

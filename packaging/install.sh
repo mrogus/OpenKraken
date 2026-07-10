@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# OpenKraken — universal installer.
+# Kraken-Redux — universal installer.
 #
 # Curl-able one-liner:
-#   curl -fsSL https://raw.githubusercontent.com/davidboulay/OpenKraken/main/packaging/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/mrogus/Kraken-Redux/main/packaging/install.sh | bash
 #
-# Clones (or updates) the OpenKraken source into
+# Clones (or updates) the Kraken-Redux source into
 # ~/.local/share/openkraken-src and runs its idempotent ./setup.sh, which
 # creates a venv, installs the app + deps, and adds a desktop launcher.
 #
@@ -15,7 +15,7 @@
 #
 set -euo pipefail
 
-REPO_URL="https://github.com/davidboulay/OpenKraken"
+REPO_URL="https://github.com/mrogus/Kraken-Redux"
 SRC_DIR="${OPENKRAKEN_SRC_DIR:-$HOME/.local/share/openkraken-src}"
 
 # --- pretty output ----------------------------------------------------------
@@ -65,7 +65,7 @@ hint_install() {
 
 missing=0
 
-step "OpenKraken installer"
+step "Kraken-Redux installer"
 info "source dir : $SRC_DIR"
 info "repository : $REPO_URL"
 
@@ -120,7 +120,7 @@ if [ "$missing" -ne 0 ]; then
 fi
 
 # --- clone or update --------------------------------------------------------
-step "Fetching OpenKraken source"
+step "Fetching Kraken-Redux source"
 mkdir -p "$(dirname "$SRC_DIR")"
 if [ -d "$SRC_DIR/.git" ]; then
     info "existing checkout found; updating"
@@ -150,6 +150,6 @@ chmod +x "$SRC_DIR/setup.sh" 2>/dev/null || true
 ( cd "$SRC_DIR" && bash ./setup.sh )
 
 step "All done"
-ok "OpenKraken installed from $SRC_DIR"
-info "Launch \"OpenKraken\" from your application menu, or run:"
-info "    $SRC_DIR/.venv/bin/openkraken"
+ok "Kraken-Redux installed from $SRC_DIR"
+info "Launch \"Kraken-Redux\" from your application menu, or run:"
+info "    $SRC_DIR/.venv/bin/kraken-redux"

@@ -1,6 +1,6 @@
 """Render an NZXT-style *web integration* to a frame for the Kraken LCD.
 
-This is OpenKraken's Linux stand-in for NZXT CAM's "Web Integration": a web app
+This is Kraken-Redux's Linux stand-in for NZXT CAM's "Web Integration": a web app
 (HTML/JS/CSS, e.g. https://reinhardtbotha.github.io/NZXT-aviation/) is loaded in a
 headless Chromium via Playwright, fed live telemetry through the same
 ``window.nzxt.v1`` API CAM injects, and screenshotted at the LCD resolution. The

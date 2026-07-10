@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gated hardware validation probe for OpenKraken native LED control.
+"""Gated hardware validation probe for Kraken-Redux native LED control.
 
 This script is the **only** sanctioned way to answer the open hardware
 questions in ``PROTOCOL.md`` §10 for the NZXT Kraken 2024 Elite RGB
@@ -472,11 +472,11 @@ def print_results(
 def confirm_gate(assume_yes: bool) -> bool:
     """Require explicit consent before writing to the live cooler."""
     out("=" * 70)
-    out("OpenKraken — RGB HARDWARE PROBE")
+    out("Kraken-Redux — RGB HARDWARE PROBE")
     out("=" * 70)
     out("This will WRITE real RGB frames to the attached NZXT Kraken 2024")
     out("Elite RGB cooler (ring + fan LEDs). Make sure NOTHING else is using")
-    out("the device: close the OpenKraken GUI, the liquidctl CLI, and any")
+    out("the device: close the Kraken-Redux GUI, the liquidctl CLI, and any")
     out("other monitoring tool first. Cooling/pump/LCD are NOT touched.")
     out("")
     if assume_yes:
@@ -486,7 +486,7 @@ def confirm_gate(assume_yes: bool) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="OpenKraken RGB hardware probe.")
+    parser = argparse.ArgumentParser(description="Kraken-Redux RGB hardware probe.")
     parser.add_argument(
         "--yes",
         action="store_true",

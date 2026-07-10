@@ -345,7 +345,7 @@ class LcdPage(QWidget):
         self._clear_media_button.setToolTip(
             "Erase images/GIFs stored in the cooler's onboard memory.\n"
             "The cooler replays the last uploaded media on its own during\n"
-            "boot (before OpenKraken starts); clearing restores the firmware\n"
+            "boot (before Kraken-Redux starts); clearing restores the firmware\n"
             "default boot screen. Your configured mode is re-applied after."
         )
         self._clear_media_button.clicked.connect(self._clear_stored_media)

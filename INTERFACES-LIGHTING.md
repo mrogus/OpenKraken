@@ -1,4 +1,4 @@
-# OpenKraken — Lighting feature interface addendum
+# Kraken-Redux — Lighting feature interface addendum
 
 Extends `INTERFACES.md` (same rules apply). Adds native LED control for the
 Kraken 2024 Elite RGB: the 24-LED pump ring and the RGB Core fan channel,

@@ -42,7 +42,7 @@ _LOGGER = logging.getLogger(__name__)
 _LIQUIDCTL_URL = "https://github.com/liquidctl/liquidctl"
 
 _DISCLAIMER = (
-    "OpenKraken is an unofficial, community tool and is not affiliated with NZXT. "
+    "Kraken-Redux is an unofficial, community tool and is not affiliated with NZXT. "
     "It controls cooling hardware directly — use at your own risk."
 )
 
@@ -150,7 +150,7 @@ class SettingsPage(QWidget):
         )
         self._run_background.setToolTip(
             "Without a system tray (e.g. stock GNOME), closing the window keeps "
-            "cooling/lighting active. Reopen by launching OpenKraken again. "
+            "cooling/lighting active. Reopen by launching Kraken-Redux again. "
             "Press Ctrl+Q to quit."
         )
         form.addRow("", self._run_background)
@@ -189,7 +189,7 @@ class SettingsPage(QWidget):
         layout = QVBoxLayout(box)
         layout.setSpacing(6)
 
-        version = QLabel(f"OpenKraken v{__version__}")
+        version = QLabel(f"Kraken-Redux v{__version__}")
         layout.addWidget(version)
 
         link = QLabel(
