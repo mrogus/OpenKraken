@@ -80,6 +80,8 @@ model, installs a desktop launcher.
 
 ## AUR
 
+Note: The package might not be on AUR yet as they have temporarily locked down registration of new accounts.
+
 ```sh
 git clone https://aur.archlinux.org/kraken-redux.git
 cd kraken-redux
@@ -113,6 +115,11 @@ renders the page and streams it to the panel.
 Browse existing ones here: [NZXT web-integrations-examples community
 list](https://github.com/NZXTCorp/web-integrations-examples/blob/main/community.md).
 Add one from the LCD page (Web Integration mode → Add… → paste its URL).
+
+Example web-integration called "Aviation": https://github.com/ReinhardtBotha/NZXT-aviation/
+<img width="638" height="638" alt="Screenshot1" src="https://github.com/user-attachments/assets/af1497fd-5973-469f-8f06-736bb8b5fb35" />
+
+
 
 **Writing your own:** it's a normal web page. NZXT's runtime injects
 `window.nzxt.v1` before your page loads (`{ width, height, shape, targetFps }`)
