@@ -80,6 +80,8 @@ model, installs a desktop launcher.
 
 ## AUR
 
+Note: The package might not be on AUR yet as they have temporarily locked down registration of new accounts.
+
 ```sh
 git clone https://aur.archlinux.org/kraken-redux.git
 cd kraken-redux
