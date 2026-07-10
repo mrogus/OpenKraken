@@ -37,7 +37,6 @@ package() {
     install -Dm644 "packaging/aur/70-kraken-redux.rules" \
         "$pkgdir/usr/lib/udev/rules.d/70-kraken-redux.rules"
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
-    install -Dm644 PROTOCOL.md "$pkgdir/usr/share/doc/$pkgname/PROTOCOL.md"
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 
     # The installed .desktop ships @EXEC@/@ICON@ placeholders meant for setup.sh's

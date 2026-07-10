@@ -18,9 +18,9 @@ driver. Anything it lists under that class should work:
 | Kraken 2024 Elite RGB | `1e71:3012` | 640×640 |
 | Kraken 2024 Plus | `1e71:3014` | 240×240 |
 
-Native RGB control (the reverse-engineered HUE2 protocol, see
-[PROTOCOL.md](PROTOCOL.md)) was built against the 2024 Elite RGB — other
-models should work for cooling/LCD but haven't been checked for lighting.
+Native RGB control (the reverse-engineered HUE2 protocol) was built against
+the 2024 Elite RGB — other models should work for cooling/LCD but haven't
+been checked for lighting.
 
 ## Credit
 

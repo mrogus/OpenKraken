@@ -11,12 +11,7 @@
 #   1. compute the new version and write it to pyproject.toml + openkraken/__init__.py
 #   2. commit "Release vX.Y.Z" and create an annotated tag vX.Y.Z
 #   3. push the branch and the tag
-#   4. build the .deb (packaging/build-deb.sh)
-#   5. create a GitHub release for the tag with the .deb attached (needs `gh`)
-#
-# The GitHub Actions workflow (.github/workflows/release.yml) ALSO builds and
-# attaches a .deb on any pushed tag, so step 5 is belt-and-braces for local runs
-# and a no-op-safe if a release already exists.
+#   4. create a GitHub release for the tag (needs `gh`)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
@@ -74,26 +69,17 @@ git -C "$ROOT" push origin "$BRANCH"
 git -C "$ROOT" push origin "v$NEW"
 info "pushed $BRANCH and tag v$NEW"
 
-# --- 4. build the .deb -------------------------------------------------------
-info "building the .deb"
-"$SCRIPT_DIR/build-deb.sh"
-DEB="$(ls -t "$SCRIPT_DIR/dist/openkraken_${NEW}_"*.deb 2>/dev/null | head -1 || true)"
-[ -n "$DEB" ] || err "build-deb.sh did not produce openkraken_${NEW}_*.deb"
-info "built $DEB"
-
-# --- 5. GitHub release -------------------------------------------------------
+# --- 4. GitHub release -------------------------------------------------------
 if command -v gh >/dev/null 2>&1; then
     info "creating GitHub release v$NEW"
-    if gh release view "v$NEW" >/dev/null 2>&1; then
-        gh release upload "v$NEW" "$DEB" --clobber
-    else
-        gh release create "v$NEW" "$DEB" \
+    if ! gh release view "v$NEW" >/dev/null 2>&1; then
+        gh release create "v$NEW" \
             --title "Kraken-Redux v$NEW" \
             --generate-notes
     fi
     info "GitHub release v$NEW ready"
 else
-    info "gh not found — tag pushed; the GitHub Actions workflow will build the release."
+    info "gh not found — tag pushed; create the GitHub release manually if needed."
 fi
 
 info "Done: v$NEW released."
